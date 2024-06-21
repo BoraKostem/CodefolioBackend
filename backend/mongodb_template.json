@@ -1,0 +1,54 @@
+{
+    "user": {
+      "_id": "ObjectId",
+      "name": "String",
+      "location": "String",
+      "password": "String",
+      "email": "String",
+      "phone": "String",
+      "github_url": "String",
+      "linkedin_url": "String",
+      "cv_language": [
+        {
+          "_id": "ObjectId",
+          "language": "String",
+          "proficiency": "String"
+        }
+      ],
+      "cv_information": [
+        {
+          "_id": "ObjectId",
+          "headline": "String",
+          "info": "String"
+        }
+      ],
+      "cv_projects": [
+        {
+          "_id": "ObjectId",
+          "project_name": "String",
+          "description": "String",
+          "cv_projects_language": [
+            {
+              "_id": "ObjectId",
+              "language": "String"
+            }
+          ]
+        }
+      ],
+      "github_projects": [
+        {
+          "_id": "ObjectId",
+          "project_name": "String",
+          "description": "String",
+          "github_projects_language": [
+            {
+              "_id": "ObjectId",
+              "language": "String",
+              "percentage": "Number"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  

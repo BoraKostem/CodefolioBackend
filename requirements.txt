@@ -1,3 +1,6 @@
 django
 PyMongo
 dnspython
+djangorestframework
+markdown
+django-filter
