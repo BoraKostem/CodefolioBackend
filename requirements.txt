@@ -1,5 +1,5 @@
 django
-PyMongo
+psycopg2-binary
 dnspython
 djangorestframework
 markdown
