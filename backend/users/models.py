@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-
+import uuid
 class MyUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -35,30 +35,44 @@ class MyUser(AbstractBaseUser):
     REQUIRED_FIELDS = ['name']
 
 class CVLanguage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(MyUser, related_name='cv_languages', on_delete=models.CASCADE)
     language = models.CharField(max_length=255)
     proficiency = models.CharField(max_length=255)
+    class Meta:
+        unique_together = ('user', 'language',)
 
 class CVInformation(models.Model):
-    user = models.ForeignKey(MyUser, related_name='cv_information', on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(MyUser, related_name='cv_informations', on_delete=models.CASCADE)
     headline = models.CharField(max_length=255)
     info = models.TextField()
+    class Meta:
+        unique_together = ('user', 'headline',)
 
 class CVProjectLanguage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     language = models.CharField(max_length=255)
-    project = models.ForeignKey('CVProject', related_name='cv_projects_languages', on_delete=models.CASCADE)
+    project = models.ForeignKey('CVProject', related_name='cv_project_languages', on_delete=models.CASCADE)
+    class Meta:
+        unique_together = ('language', 'project',)
 
 class CVProject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(MyUser, related_name='cv_projects', on_delete=models.CASCADE)
     project_name = models.CharField(max_length=255)
     description = models.TextField()
 
 class GitHubProjectLanguage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     language = models.CharField(max_length=255)
     percentage = models.FloatField()
-    project = models.ForeignKey('GitHubProject', related_name='github_projects_languages', on_delete=models.CASCADE)
+    project = models.ForeignKey('GitHubProject', related_name='github_project_languages', on_delete=models.CASCADE)
+    class Meta:
+        unique_together = ('language', 'project',)
 
 class GitHubProject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(MyUser, related_name='github_projects', on_delete=models.CASCADE)
     project_name = models.CharField(max_length=255)
     description = models.TextField()
