@@ -13,8 +13,16 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Initialize environment variables
+env = environ.Env()
+# Assuming your .env file is in the same directory as settings.py
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -81,13 +89,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'codefolio',
-        'USER': os.getenv('POSTGRE_USER'),
-        'PASSWORD': os.getenv('POSTGRE_PASSWORD'),
-        'HOST': os.getenv('POSTGRE_HOST'),
-        'PORT': os.getenv('POSTGRE_PORT'),
+        'USER': env('POSTGRE_USER'),
+        'PASSWORD': env('POSTGRE_PASSWORD'),
+        'HOST': env('POSTGRE_HOST'),
+        'PORT': env('POSTGRE_PORT'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
