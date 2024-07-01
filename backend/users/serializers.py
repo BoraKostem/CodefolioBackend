@@ -35,6 +35,24 @@ class GitHubProjectSerializer(serializers.ModelSerializer):
         model = GitHubProject
         fields = ['id', 'project_name', 'description', 'github_projects_languages']
 
+    def create(self, validated_data):
+        # Step 2: Extract languages data if present
+        languages_data = validated_data.pop('languages', [])
+
+        # Step 3: Create the GitHubProject instance
+        github_project = GitHubProject.objects.create(
+            user_id=validated_data['user'].id,
+            project_name=validated_data['project_name'],
+            description=validated_data['description']
+        )
+
+        # Step 4 & 5: Iterate over languages data and create GitHubProjectLanguage instances
+        for language, percentage in languages_data.items():
+            GitHubProjectLanguage.objects.create(project=github_project, language=language, percentage=percentage)
+
+        # Step 6: Return the GitHubProject instance
+        return github_project
+
 class UserSerializer(serializers.ModelSerializer):
     cv_languages = CVLanguageSerializer(many=True, read_only=True)
     cv_information = CVInformationSerializer(many=True, read_only=True)
