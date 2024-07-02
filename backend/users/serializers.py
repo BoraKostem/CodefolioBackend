@@ -30,25 +30,37 @@ class GitHubProjectLanguageSerializer(serializers.ModelSerializer):
 
 class GitHubProjectSerializer(serializers.ModelSerializer):
     github_projects_languages = GitHubProjectLanguageSerializer(many=True, read_only=True)
-
+    languages = serializers.DictField()
     class Meta:
         model = GitHubProject
-        fields = ['id', 'project_name', 'description', 'github_projects_languages']
+        fields = ['id', 'project_name', 'description', 'user', 'languages', 'github_projects_languages']
+
+    def get_languages(self, obj):
+        # Assuming GitHubProjectLanguage has a foreign key to GitHubProject
+        # and contains fields 'language' and 'percentage'
+        languages = GitHubProjectLanguage.objects.filter(project=obj)
+        return GitHubProjectLanguageSerializer(languages, many=True).data
 
     def create(self, validated_data):
+        print(validated_data['languages'])
         # Step 2: Extract languages data if present
-        languages_data = validated_data.pop('languages', [])
+        languages_data = validated_data.pop('languages', {})
 
         # Step 3: Create the GitHubProject instance
         github_project = GitHubProject.objects.create(
-            user_id=validated_data['user'].id,
+            user=validated_data['user'],
             project_name=validated_data['project_name'],
             description=validated_data['description']
         )
 
+        print(languages_data)
         # Step 4 & 5: Iterate over languages data and create GitHubProjectLanguage instances
-        for language, percentage in languages_data.items():
-            GitHubProjectLanguage.objects.create(project=github_project, language=language, percentage=percentage)
+        if languages_data != []:
+            for language, percentage in languages_data.items():
+                GitHubProjectLanguage.objects.create(
+                    project=github_project,
+                    language=language,
+                    percentage=percentage)
 
         # Step 6: Return the GitHubProject instance
         return github_project

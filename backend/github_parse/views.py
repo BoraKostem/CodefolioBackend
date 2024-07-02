@@ -23,10 +23,9 @@ class GithubRepoView(APIView):
         if user_serializer.is_valid():
             user_serializer.save()
         else:
-            return ResponseFormatter.format_response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return ResponseFormatter.format_response(user_serializer.errors, http_code=status.HTTP_400_BAD_REQUEST)
         
         GitHubProject.objects.filter(user=user).delete()
-        print(user_serializer.data)
 
         username = url.split('/')[-1]
         repos = GithubRepo.fetch_github_repos(username)
@@ -35,16 +34,18 @@ class GithubRepoView(APIView):
             return ResponseFormatter.format_response(str(repos), http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message="Failed to fetch GitHub repositories.")
         
         for repo in repos:
+            description = repo.get('description') or '-'
             project_data = {
-                'user': user_serializer.data,
+                'user': user_serializer.data["id"],
                 'project_name': repo['name'],
-                'description': repo.get('description', ''),
+                'description': description,
                 'languages': repo['languages'],
             }
+            #print(project_data['languages'])
             project_serializer = GitHubProjectSerializer(data=project_data)
             if project_serializer.is_valid():
                 project_serializer.save()
             else:
-                return ResponseFormatter.format_response(project_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return ResponseFormatter.format_response(project_serializer.errors, http_code=status.HTTP_400_BAD_REQUEST)
 
         return ResponseFormatter.format_response(repos)
