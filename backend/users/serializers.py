@@ -26,43 +26,33 @@ class CVProjectSerializer(serializers.ModelSerializer):
 class GitHubProjectLanguageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GitHubProjectLanguage
-        fields = ['id', 'language', 'percentage']
+        fields = ['language', 'percentage']
 
 class GitHubProjectSerializer(serializers.ModelSerializer):
-    github_projects_languages = GitHubProjectLanguageSerializer(many=True, read_only=True)
-    languages = serializers.DictField()
+    github_project_languages = GitHubProjectLanguageSerializer(many=True)
+
     class Meta:
         model = GitHubProject
-        fields = ['id', 'project_name', 'description', 'user', 'languages', 'github_projects_languages']
-
-    def get_languages(self, obj):
-        # Assuming GitHubProjectLanguage has a foreign key to GitHubProject
-        # and contains fields 'language' and 'percentage'
-        languages = GitHubProjectLanguage.objects.filter(project=obj)
-        return GitHubProjectLanguageSerializer(languages, many=True).data
+        fields = ['id', 'project_name', 'description', 'user', 'github_project_languages']
+        extra_kwargs = {'user': {'write_only': True}}
 
     def create(self, validated_data):
-        print(validated_data['languages'])
-        # Step 2: Extract languages data if present
-        languages_data = validated_data.pop('languages', {})
 
-        # Step 3: Create the GitHubProject instance
+        languages_data = validated_data.pop('github_project_languages', [])
+
         github_project = GitHubProject.objects.create(
             user=validated_data['user'],
             project_name=validated_data['project_name'],
             description=validated_data['description']
         )
-
         print(languages_data)
-        # Step 4 & 5: Iterate over languages data and create GitHubProjectLanguage instances
-        if languages_data != []:
-            for language, percentage in languages_data.items():
+        if languages_data != {}:
+            for language_data in languages_data:
                 GitHubProjectLanguage.objects.create(
                     project=github_project,
-                    language=language,
-                    percentage=percentage)
+                    language=language_data['language'],
+                    percentage=language_data['percentage'])
 
-        # Step 6: Return the GitHubProject instance
         return github_project
 
 class UserSerializer(serializers.ModelSerializer):
