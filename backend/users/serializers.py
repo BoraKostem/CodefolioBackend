@@ -26,14 +26,34 @@ class CVProjectSerializer(serializers.ModelSerializer):
 class GitHubProjectLanguageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GitHubProjectLanguage
-        fields = ['id', 'language', 'percentage']
+        fields = ['language', 'percentage']
 
 class GitHubProjectSerializer(serializers.ModelSerializer):
-    github_projects_languages = GitHubProjectLanguageSerializer(many=True, read_only=True)
+    github_project_languages = GitHubProjectLanguageSerializer(many=True)
 
     class Meta:
         model = GitHubProject
-        fields = ['id', 'project_name', 'description', 'github_projects_languages']
+        fields = ['id', 'project_name', 'description', 'user', 'github_project_languages']
+        extra_kwargs = {'user': {'write_only': True}}
+
+    def create(self, validated_data):
+
+        languages_data = validated_data.pop('github_project_languages', [])
+
+        github_project = GitHubProject.objects.create(
+            user=validated_data['user'],
+            project_name=validated_data['project_name'],
+            description=validated_data['description']
+        )
+        print(languages_data)
+        if languages_data != {}:
+            for language_data in languages_data:
+                GitHubProjectLanguage.objects.create(
+                    project=github_project,
+                    language=language_data['language'],
+                    percentage=language_data['percentage'])
+
+        return github_project
 
 class UserSerializer(serializers.ModelSerializer):
     cv_languages = CVLanguageSerializer(many=True, read_only=True)
