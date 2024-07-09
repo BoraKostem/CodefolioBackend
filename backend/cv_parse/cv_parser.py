@@ -88,7 +88,7 @@ the output should be like this: (do not change the layout of the output, just fi
         
           "project_name": "String",
           "description": "String",
-          "cv_projects_language": [
+          "cv_project_languages": [
 
               "language": "String" (java, python, etc),
             

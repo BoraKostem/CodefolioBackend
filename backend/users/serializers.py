@@ -4,12 +4,12 @@ from .models import MyUser, CVLanguage, CVInformation, CVProject, CVProjectLangu
 class CVLanguageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVLanguage
-        fields = ['id', 'language', 'proficiency']
+        fields = ['id', 'language', 'user']
 
 class CVInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVInformation
-        fields = ['id', 'headline', 'info'] 
+        fields = ['id', 'headline', 'user', 'info'] 
 
 class CVExperienceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,12 +37,28 @@ class CVProjectLanguageSerializer(serializers.ModelSerializer):
         fields = ['id', 'language']
 
 class CVProjectSerializer(serializers.ModelSerializer):
-    cv_projects_languages = CVProjectLanguageSerializer(many=True, read_only=True)
+    cv_project_languages = CVProjectLanguageSerializer(many=True)
 
     class Meta:
         model = CVProject
-        fields = ['id', 'project_name', 'description', 'cv_projects_languages']
+        fields = ['id', 'project_name', 'description', 'user', 'cv_project_languages']
         extra_kwargs = {'user': {'write_only': True}}
+
+    def create(self, validated_data):
+        languages_data = validated_data.pop('cv_project_languages', [])
+        cv_project = CVProject.objects.create(
+            user=validated_data['user'],
+            project_name=validated_data['project_name'],
+            description=validated_data['description']
+        )
+    
+        if languages_data != {}:
+            for language_data in languages_data:
+                CVProjectLanguage.objects.create(
+                    project=cv_project,
+                    language=language_data['language'])
+    
+        return cv_project
 
 class GitHubProjectLanguageSerializer(serializers.ModelSerializer):
     class Meta:

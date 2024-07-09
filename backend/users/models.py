@@ -37,7 +37,6 @@ class CVLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
     user = models.ForeignKey(MyUser, related_name='cv_languages', on_delete=models.CASCADE)
     language = models.CharField(max_length=255)
-    proficiency = models.CharField(max_length=255)
     class Meta:
         unique_together = ('user', 'language',)
 
