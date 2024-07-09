@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import MyUser, CVLanguage, CVInformation, CVProject, CVProjectLanguage, GitHubProject, GitHubProjectLanguage
+from .models import MyUser, CVLanguage, CVInformation, CVProject, CVProjectLanguage, GitHubProject, GitHubProjectLanguage, CVExperience, CVEducation, CVSkill, CVCertification
 
 class CVLanguageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,7 +9,27 @@ class CVLanguageSerializer(serializers.ModelSerializer):
 class CVInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVInformation
-        fields = ['id', 'headline', 'info']
+        fields = ['id', 'headline', 'info'] 
+
+class CVExperienceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CVExperience
+        fields = ['user', 'company_name', 'description', 'position', 'location', 'start_date', 'end_date']
+
+class CVEducationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CVEducation
+        fields = ['user', 'degree', 'school', 'location', 'start_date', 'end_date']
+
+class CVSkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CVSkill
+        fields = ['user', 'skill']
+
+class CVCertificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CVCertification
+        fields = ['user', 'certification_name', 'description', 'url', 'date']
 
 class CVProjectLanguageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,6 +42,7 @@ class CVProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVProject
         fields = ['id', 'project_name', 'description', 'cv_projects_languages']
+        extra_kwargs = {'user': {'write_only': True}}
 
 class GitHubProjectLanguageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,12 +79,16 @@ class GitHubProjectSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     cv_languages = CVLanguageSerializer(many=True, read_only=True)
     cv_information = CVInformationSerializer(many=True, read_only=True)
+    cv_experiences = CVExperienceSerializer(many=True, read_only=True)
+    cv_education = CVEducationSerializer(many=True, read_only=True)
+    cv_skills = CVSkillSerializer(many=True, read_only=True)
+    cv_certifications = CVCertificationSerializer(many=True, read_only=True)
     cv_projects = CVProjectSerializer(many=True, read_only=True)
     github_projects = GitHubProjectSerializer(many=True, read_only=True)
 
     class Meta:
         model = MyUser
-        fields = ['id', 'email', 'name', 'location', 'phone', 'github_url', 'linkedin_url', 'cv_languages', 'cv_information', 'cv_projects', 'github_projects', 'password']
+        fields = ['id', 'email', 'name', 'location', 'phone', 'github_url', 'linkedin_url', 'cv_languages', 'cv_information', 'cv_experiences', 'cv_education', 'cv_skills', 'cv_certifications', 'cv_projects', 'github_projects', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
