@@ -24,7 +24,6 @@ from .cv_parser import cv_parser
 bucket = env('AWS_STORAGE_BUCKET_NAME')
 
 class UserCVUploadAPIView(APIView):
-    parser_classes = (MultiPartParser, JSONParser)  # To support both JSON and multipart/form-data requests
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -47,6 +46,7 @@ class UserCVUploadAPIView(APIView):
                 # Upload the file to S3
                 s3_client.put_object(Bucket=bucket, Key=file_key, Body=file_content)
                 
+                # Save the CV data to the database
                 self.createCVs(cv, user.id)
             except ClientError as e:
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
@@ -139,3 +139,39 @@ class UserCVUploadAPIView(APIView):
                 cv_certification_serializer.save()
             else:
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message=cv_certification_serializer.errors)
+            
+class UserCVAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        
+        cv_info = CVInformation.objects.filter(user=user)
+        cv_languages = CVLanguage.objects.filter(user=user)
+        cv_experiences = CVExperience.objects.filter(user=user)
+        cv_educations = CVEducation.objects.filter(user=user)
+        cv_skills = CVSkill.objects.filter(user=user)
+        cv_certifications = CVCertification.objects.filter(user=user)
+        cv_projects = CVProject.objects.filter(user=user)
+
+        cv_info = CVInformationSerializer(cv_info, many=True)
+        cv_languages = CVLanguageSerializer(cv_languages, many=True)
+        cv_experiences = CVExperienceSerializer(cv_experiences, many=True)
+        cv_educations = CVEducationSerializer(cv_educations, many=True)
+        cv_skills = CVSkillSerializer(cv_skills, many=True)
+        cv_certifications = CVCertificationSerializer(cv_certifications, many=True)
+        cv_projects = CVProjectSerializer(cv_projects, many=True)
+
+        cv = {
+            'about': cv_info.data[0]["info"],
+            'cv_languages': cv_languages.data,
+            'cv_experiences': cv_experiences.data,
+            'cv_educations': cv_educations.data,
+            'cv_skills': cv_skills.data,
+            'cv_certifications': cv_certifications.data,
+            'cv_projects': cv_projects.data
+        }
+
+        return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)

@@ -5,31 +5,43 @@ class CVLanguageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVLanguage
         fields = ['id', 'language', 'user']
+        extra_kwargs = {
+            'user': {'write_only': True},
+            'id': {'read_only': True}
+        }
 
 class CVInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVInformation
-        fields = ['id', 'headline', 'user', 'info'] 
+        fields = ['id', 'headline', 'user', 'info']
+        extra_kwargs = {
+            'user': {'write_only': True},
+            'id': {'read_only': True}
+        }
 
 class CVExperienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVExperience
         fields = ['user', 'company_name', 'description', 'position', 'location', 'start_date', 'end_date']
+        extra_kwargs = {'user': {'write_only': True}}
 
 class CVEducationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVEducation
         fields = ['user', 'degree', 'school', 'location', 'start_date', 'end_date']
+        extra_kwargs = {'user': {'write_only': True}}
 
 class CVSkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVSkill
         fields = ['user', 'skill']
+        extra_kwargs = {'user': {'write_only': True}}
 
 class CVCertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVCertification
         fields = ['user', 'certification_name', 'description', 'url', 'date']
+        extra_kwargs = {'user': {'write_only': True}}
 
 class CVProjectLanguageSerializer(serializers.ModelSerializer):
     class Meta:
