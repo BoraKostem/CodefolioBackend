@@ -210,3 +210,37 @@ class UserCVProjectEditAPIView(APIView):
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
         return ResponseFormatter.format_response(CVProjectSerializer(project).data, http_code=status.HTTP_200_OK)
+    
+class UserCVProjectDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        project_id = request.data.get('project_id')
+        languages = request.data.get('languages')
+        if not project_id:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'project_id' field is required. (languages is optional)")
+        try:
+            project = CVProject.objects.get(id=project_id, user=user)
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message="Project not found.")
+        if languages:
+            if not isinstance(languages, list):
+                languages = [languages]
+            for language in languages:
+                object = CVProjectLanguage.objects.filter(
+                    project=project,
+                    language=language
+                )
+                if not object:
+                    return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Language {language} not found in project {project_id}")
+                object.delete()
+        else:
+            try:
+                project.delete()
+            except Exception as e:
+                return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)

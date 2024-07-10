@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import UserCreate, LoginView, WhoAmIView
 from github_parse.views import GithubRepoView
-from cv_parse.views import UserCVUploadAPIView, UserCVAPIView, UserCVProjectEditAPIView
+from cv_parse.views import UserCVUploadAPIView, UserCVAPIView, UserCVProjectEditAPIView, UserCVProjectDeleteAPIView
 urlpatterns = [
     path('register', UserCreate.as_view(), name='register'),
     path('login', LoginView.as_view(), name='login'),
@@ -9,5 +9,6 @@ urlpatterns = [
     path('profile/cv/upload', UserCVUploadAPIView.as_view(), name='cv'),
     path('profile/cv', UserCVAPIView.as_view(), name='cv'),
     path('profile/cv/project/edit', UserCVProjectEditAPIView.as_view(), name='cv_project_edit'),
+    path('profile/cv/project/delete', UserCVProjectDeleteAPIView.as_view(), name='cv_project_delete'),
     path('whoami/', WhoAmIView.as_view(), name='whoami'),
 ]
