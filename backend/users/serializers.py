@@ -57,20 +57,32 @@ class CVProjectSerializer(serializers.ModelSerializer):
         extra_kwargs = {'user': {'write_only': True}}
 
     def create(self, validated_data):
+        project_id = validated_data.get('id', None)
         languages_data = validated_data.pop('cv_project_languages', [])
-        cv_project = CVProject.objects.create(
-            user=validated_data['user'],
-            project_name=validated_data['project_name'],
-            description=validated_data['description']
-        )
-    
-        if languages_data != {}:
+        if project_id:
+            # If an ID is provided, try to fetch the existing project.
+            cv_project = CVProject.objects.filter(id=project_id).first()
+            if not cv_project:
+                raise serializers.ValidationError("Project not found.")
+        else:
+            cv_project = CVProject.objects.create(
+                user=validated_data['user'],
+                project_name=validated_data['project_name'],
+                description=validated_data['description']
+            )
+        if validated_data["description"] != "":
+            cv_project.description = validated_data["description"]
+
+        if languages_data != {} or languages_data != []:
             for language_data in languages_data:
-                CVProjectLanguage.objects.create(
+                language, created = CVProjectLanguage.objects.get_or_create(
                     project=cv_project,
-                    language=language_data['language'])
+                    language=language_data['language']
+                )
     
         return cv_project
+    
+
 
 class GitHubProjectLanguageSerializer(serializers.ModelSerializer):
     class Meta:

@@ -6,7 +6,7 @@ from users.serializers import CVLanguageSerializer, CVInformationSerializer, CVE
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from backend.utils import ResponseFormatter
-from users.models import CVLanguage, CVInformation, CVExperience, CVEducation, CVSkill, CVCertification, CVProject
+from users.models import CVLanguage, CVInformation, CVExperience, CVEducation, CVSkill, CVCertification, CVProject, CVProjectLanguage
 import json
 import boto3
 from botocore.exceptions import ClientError
@@ -175,3 +175,38 @@ class UserCVAPIView(APIView):
         }
 
         return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)
+    
+class UserCVProjectEditAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        project_id = request.data.get('project_id')
+        new_description = request.data.get('description')
+        languages = request.data.get('languages')
+
+        if not project_id or not (new_description or languages):
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'project_id' and at least one of these field are required: 'description' or 'languages'")
+        try:
+            project = CVProject.objects.get(id=project_id, user=user)
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message="Project not found.")
+
+        if new_description:
+            project.description = new_description
+        if languages:
+            if not isinstance(languages, list):
+                languages = [languages]
+            for language in languages:
+                CVProjectLanguage.objects.get_or_create(
+                    project=project,
+                    language=language
+                )
+        try:
+            project.save()
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(CVProjectSerializer(project).data, http_code=status.HTTP_200_OK)
