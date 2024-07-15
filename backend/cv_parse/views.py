@@ -244,3 +244,283 @@ class UserCVProjectDeleteAPIView(APIView):
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
         return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+
+class UserCVProjectAddAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        project_name = request.data.get('project_name')
+        description = request.data.get('description')
+        languages = request.data.get('languages')
+        if not project_name or not description or not languages:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'project_name', 'description' and 'languages' fields are required.")
+        try:
+            project = CVProject.objects.create(
+                user=user,
+                project_name=project_name,
+                description=description
+            )
+            if not isinstance(languages, list):
+                languages = [languages]
+            for language in languages:
+                CVProjectLanguage.objects.get_or_create(
+                    project=project,
+                    language=language
+                )
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(CVProjectSerializer(project).data, http_code=status.HTTP_200_OK)
+
+class UserAddorDeleteCVLanguageAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        language = request.data.get('language')
+        if not language:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'language' field is required.")
+        try:
+            CVLanguage.objects.get_or_create(
+                user=user,
+                language=language
+            )
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        language = request.data.get('language')
+        if not language:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'language' field is required.")
+        try:
+            object = CVLanguage.objects.get(
+                user=user,
+                language=language
+            )
+            object.delete()
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Language {language} not found.")
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+class UserAddorDeleteCVExperienceAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        company_name = request.data.get('company_name')
+        description = request.data.get('description')
+        position = request.data.get('position')
+        location = request.data.get('location')
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        if not company_name or not description or not position or not location or not start_date:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'company_name', 'description', 'position', 'location' and 'start_date' fields are required | 'end_date' is optional. Format: MM/YYYY")
+        try:
+            CVExperience.objects.create(
+                user=user,
+                company_name=company_name,
+                description=description,
+                position=position,
+                location=location,
+                start_date=start_date,
+                end_date=end_date
+            )
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        experience_id = request.data.get('experience_id')
+        if not experience_id:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'experience_id' field is required.")
+        try:
+            object = CVExperience.objects.get(
+                user=user,
+                id=experience_id
+            ) 
+            object.delete()
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Experience not found.")
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+class UserAddorDeleteCVEducationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        degree = request.data.get('degree')
+        school = request.data.get('school')
+        location = request.data.get('location')
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
+        if not degree or not school or not location or not start_date:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'degree', 'school', 'location' and 'start_date' fields are required | 'end_date' is optional. Format: MM/YYYY")
+        try:
+            CVEducation.objects.create(
+                user=user,
+                degree=degree,
+                school=school,
+                location=location,
+                start_date=start_date,
+                end_date=end_date
+            )
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        education_id = request.data.get('education_id')
+        if not education_id:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'education_id' field is required.")
+        try:
+            object = CVEducation.objects.get(
+                user=user,
+                id=education_id
+            )
+            object.delete()
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Education not found.")
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+class UserAddorDeleteCVSkillAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        skill = request.data.get('skill')
+        if not skill:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'skill' field is required.")
+        try:
+            CVSkill.objects.get_or_create(
+                user=user,
+                skill=skill
+            )
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        skill = request.data.get('skill')
+        if not skill:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'skill' field is required.")
+        try:
+            object = CVSkill.objects.get(
+                user=user,
+                skill=skill
+            )
+            object.delete()
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Skill {skill} not found.")
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+
+class UserAddorDeleteCVCertificationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        certification_name = request.data.get('certification_name')
+        description = request.data.get('description')
+        url = request.data.get('url')
+        date = request.data.get('date')
+        if not certification_name or not description or not url or not date:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'certification_name', 'description', 'url' and 'date' fields are required.")
+        try:
+            CVCertification.objects.create(
+                user=user,
+                certification_name=certification_name,
+                description=description,
+                url=url,
+                date=date
+            )
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        certification_id = request.data.get('certification_id')
+        if not certification_id:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'certification_id' field is required.")
+        try:
+            object = CVCertification.objects.get(
+                user=user,
+                id=certification_id
+            )  
+            object.delete()
+        except Exception as e:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Certification not found.")
+        
+        return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
+    
+class UserGetCV(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
+        
+        cv_info = CVInformation.objects.filter(user=user)
+        cv_languages = CVLanguage.objects.filter(user=user)
+        cv_experiences = CVExperience.objects.filter(user=user)
+        cv_educations = CVEducation.objects.filter(user=user)
+        cv_skills = CVSkill.objects.filter(user=user)
+        cv_certifications = CVCertification.objects.filter(user=user)
+        cv_projects = CVProject.objects.filter(user=user)
+
+        cv_info = CVInformationSerializer(cv_info, many=True)
+        cv_languages = CVLanguageSerializer(cv_languages, many=True)
+        cv_experiences = CVExperienceSerializer(cv_experiences, many=True)
+        cv_educations = CVEducationSerializer(cv_educations, many=True)
+        cv_skills = CVSkillSerializer(cv_skills, many=True)
+        cv_certifications = CVCertificationSerializer(cv_certifications, many=True)
+        cv_projects = CVProjectSerializer(cv_projects, many=True)
+
+        cv = {
+            'about': cv_info.data[0]["info"],
+            'cv_languages': cv_languages.data,
+            'cv_experiences': cv_experiences.data,
+            'cv_educations': cv_educations.data,
+            'cv_skills': cv_skills.data,
+            'cv_certifications': cv_certifications.data,
+            'cv_projects': cv_projects.data
+        }
+
+        return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)

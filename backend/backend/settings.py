@@ -159,5 +159,5 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = 'users.MyUser'
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000/",
+    "http://localhost:3000",
 ]

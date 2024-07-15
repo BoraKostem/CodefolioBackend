@@ -68,13 +68,15 @@ class CVEducation(models.Model):
 class CVSkill(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_skills', on_delete=models.CASCADE)
     skill = models.CharField(max_length=255)
+    class Meta:
+        unique_together = ('user', 'skill',)
 
 class CVCertification(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_certifications', on_delete=models.CASCADE)
     certification_name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)  # Optional
     url = models.URLField(null=True, blank=True)  # Optional
-    date = models.DateField()
+    date = models.CharField(max_length=18)
 
 class CVProjectLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)

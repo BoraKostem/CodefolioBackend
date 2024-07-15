@@ -22,13 +22,13 @@ class CVInformationSerializer(serializers.ModelSerializer):
 class CVExperienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVExperience
-        fields = ['user', 'company_name', 'description', 'position', 'location', 'start_date', 'end_date']
+        fields = ['id', 'user', 'company_name', 'description', 'position', 'location', 'start_date', 'end_date']
         extra_kwargs = {'user': {'write_only': True}}
 
 class CVEducationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVEducation
-        fields = ['user', 'degree', 'school', 'location', 'start_date', 'end_date']
+        fields = ['id', 'user', 'degree', 'school', 'location', 'start_date', 'end_date']
         extra_kwargs = {'user': {'write_only': True}}
 
 class CVSkillSerializer(serializers.ModelSerializer):
@@ -40,7 +40,7 @@ class CVSkillSerializer(serializers.ModelSerializer):
 class CVCertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CVCertification
-        fields = ['user', 'certification_name', 'description', 'url', 'date']
+        fields = ['id', 'user', 'certification_name', 'description', 'url', 'date']
         extra_kwargs = {'user': {'write_only': True}}
 
 class CVProjectLanguageSerializer(serializers.ModelSerializer):

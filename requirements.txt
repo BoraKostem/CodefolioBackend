@@ -11,3 +11,4 @@ pdfminer.six
 boto3
 langchain
 langchain_aws
+django-cors-headers
