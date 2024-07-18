@@ -34,7 +34,11 @@ SECRET_KEY = 'django-insecure-fhb#^e1!e3ic&s3me(6n+%r80cywmkigtdn-ks!1yarcppl3ye
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "ec2-3-76-221-49.eu-central-1.compute.amazonaws.com:8000",
+    "0.0.0.0",
+    "ec2-3-76-221-49.eu-central-1.compute.amazonaws.com"
+]
 
 
 # Application definition
@@ -50,6 +54,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'users',
     'github_parse',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -60,6 +65,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -146,7 +153,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=50),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -154,3 +161,8 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'users.MyUser'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://ec2-3-76-221-49.eu-central-1.compute.amazonaws.com:8000"
+]

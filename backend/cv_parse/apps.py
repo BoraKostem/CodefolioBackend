@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class GithubParseConfig(AppConfig):
+class CvParseConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'github_parse'
+    name = 'cv_parse'

@@ -6,3 +6,9 @@ markdown
 django-filter
 djangorestframework-simplejwt
 django-environ
+requests
+pdfminer.six
+boto3
+langchain
+langchain_aws
+django-cors-headers

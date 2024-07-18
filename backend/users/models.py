@@ -37,7 +37,6 @@ class CVLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
     user = models.ForeignKey(MyUser, related_name='cv_languages', on_delete=models.CASCADE)
     language = models.CharField(max_length=255)
-    proficiency = models.CharField(max_length=255)
     class Meta:
         unique_together = ('user', 'language',)
 
@@ -48,6 +47,36 @@ class CVInformation(models.Model):
     info = models.TextField()
     class Meta:
         unique_together = ('user', 'headline',)
+
+class CVExperience(models.Model):
+    user = models.ForeignKey(MyUser, related_name='cv_experiences', on_delete=models.CASCADE)
+    company_name = models.CharField(max_length=255)
+    description = models.TextField()
+    position = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    start_date = models.CharField(max_length=7)  # Format: MM/YYYY
+    end_date = models.CharField(max_length=7, null=True, blank=True)  # Format: MM/YYYY
+
+class CVEducation(models.Model):
+    user = models.ForeignKey(MyUser, related_name='cv_education', on_delete=models.CASCADE)
+    degree = models.CharField(max_length=255)
+    school = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    start_date = models.CharField(max_length=7)  # Format: MM/YYYY
+    end_date = models.CharField(max_length=7, null=True, blank=True)  # Format: MM/YYYY
+
+class CVSkill(models.Model):
+    user = models.ForeignKey(MyUser, related_name='cv_skills', on_delete=models.CASCADE)
+    skill = models.CharField(max_length=255)
+    class Meta:
+        unique_together = ('user', 'skill',)
+
+class CVCertification(models.Model):
+    user = models.ForeignKey(MyUser, related_name='cv_certifications', on_delete=models.CASCADE)
+    certification_name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)  # Optional
+    url = models.URLField(null=True, blank=True)  # Optional
+    date = models.CharField(max_length=18)
 
 class CVProjectLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
