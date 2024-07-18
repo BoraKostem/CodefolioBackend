@@ -12,3 +12,6 @@ boto3
 langchain
 langchain_aws
 django-cors-headers
+langchain_core
+langchain_postgres
+langchain_community
