@@ -128,7 +128,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MyUser
-        fields = ['id', 'email', 'name', 'location', 'phone', 'github_url', 'linkedin_url', 'cv_languages', 'cv_information', 'cv_experiences', 'cv_education', 'cv_skills', 'cv_certifications', 'cv_projects', 'github_projects', 'password']
+        fields = ['id', 'email', 'name', 'location', 'phone', 'github_url', 'linkedin_url', 'cv_languages', 'cv_information', 'cv_experiences', 'cv_education', 'cv_skills', 'cv_certifications', 'cv_projects', 'github_projects', 'password', 'profile_photo', 'profile_background']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

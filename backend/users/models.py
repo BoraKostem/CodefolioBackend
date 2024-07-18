@@ -23,6 +23,8 @@ class MyUser(AbstractBaseUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
     github_url = models.URLField(blank=True, null=True)
     linkedin_url = models.URLField(blank=True, null=True)
+    profile_photo = models.URLField(blank=True, null=True)
+    profile_background = models.URLField(blank=True, null=True)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -37,6 +39,7 @@ class CVLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
     user = models.ForeignKey(MyUser, related_name='cv_languages', on_delete=models.CASCADE)
     language = models.CharField(max_length=255)
+    is_manual_added = models.BooleanField(default=True)
     class Meta:
         unique_together = ('user', 'language',)
 
@@ -56,6 +59,7 @@ class CVExperience(models.Model):
     location = models.CharField(max_length=255)
     start_date = models.CharField(max_length=7)  # Format: MM/YYYY
     end_date = models.CharField(max_length=7, null=True, blank=True)  # Format: MM/YYYY
+    is_manual_added = models.BooleanField(default=True)
 
 class CVEducation(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_education', on_delete=models.CASCADE)
@@ -64,10 +68,12 @@ class CVEducation(models.Model):
     location = models.CharField(max_length=255)
     start_date = models.CharField(max_length=7)  # Format: MM/YYYY
     end_date = models.CharField(max_length=7, null=True, blank=True)  # Format: MM/YYYY
+    is_manual_added = models.BooleanField(default=True)
 
 class CVSkill(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_skills', on_delete=models.CASCADE)
     skill = models.CharField(max_length=255)
+    is_manual_added = models.BooleanField(default=True)
     class Meta:
         unique_together = ('user', 'skill',)
 
@@ -77,6 +83,7 @@ class CVCertification(models.Model):
     description = models.TextField(null=True, blank=True)  # Optional
     url = models.URLField(null=True, blank=True)  # Optional
     date = models.CharField(max_length=18)
+    is_manual_added = models.BooleanField(default=True)
 
 class CVProjectLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
@@ -90,6 +97,7 @@ class CVProject(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_projects', on_delete=models.CASCADE)
     project_name = models.CharField(max_length=255)
     description = models.TextField()
+    is_manual_added = models.BooleanField(default=True)
 
 class GitHubProjectLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
