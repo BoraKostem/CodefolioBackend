@@ -164,8 +164,11 @@ class UserCVAPIView(APIView):
         cv_certifications = CVCertificationSerializer(cv_certifications, many=True)
         cv_projects = CVProjectSerializer(cv_projects, many=True)
 
+        info = ""
+        if cv_info.data:
+            info = cv_info.data[0].get("info", "")
         cv = {
-            'about': cv_info.data[0]["info"],
+            'about': info,
             'cv_languages': cv_languages.data,
             'cv_experiences': cv_experiences.data,
             'cv_educations': cv_educations.data,
@@ -488,39 +491,3 @@ class UserAddorDeleteCVCertificationAPIView(APIView):
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Certification not found.")
         
         return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
-    
-class UserGetCV(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-        if not user.is_authenticated:
-            return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
-        
-        cv_info = CVInformation.objects.filter(user=user)
-        cv_languages = CVLanguage.objects.filter(user=user)
-        cv_experiences = CVExperience.objects.filter(user=user)
-        cv_educations = CVEducation.objects.filter(user=user)
-        cv_skills = CVSkill.objects.filter(user=user)
-        cv_certifications = CVCertification.objects.filter(user=user)
-        cv_projects = CVProject.objects.filter(user=user)
-
-        cv_info = CVInformationSerializer(cv_info, many=True)
-        cv_languages = CVLanguageSerializer(cv_languages, many=True)
-        cv_experiences = CVExperienceSerializer(cv_experiences, many=True)
-        cv_educations = CVEducationSerializer(cv_educations, many=True)
-        cv_skills = CVSkillSerializer(cv_skills, many=True)
-        cv_certifications = CVCertificationSerializer(cv_certifications, many=True)
-        cv_projects = CVProjectSerializer(cv_projects, many=True)
-
-        cv = {
-            'about': cv_info.data[0]["info"],
-            'cv_languages': cv_languages.data,
-            'cv_experiences': cv_experiences.data,
-            'cv_educations': cv_educations.data,
-            'cv_skills': cv_skills.data,
-            'cv_certifications': cv_certifications.data,
-            'cv_projects': cv_projects.data
-        }
-
-        return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)

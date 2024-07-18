@@ -34,7 +34,11 @@ SECRET_KEY = 'django-insecure-fhb#^e1!e3ic&s3me(6n+%r80cywmkigtdn-ks!1yarcppl3ye
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "ec2-3-76-221-49.eu-central-1.compute.amazonaws.com:8000",
+    "0.0.0.0",
+    "ec2-3-76-221-49.eu-central-1.compute.amazonaws.com"
+]
 
 
 # Application definition
@@ -160,4 +164,5 @@ AUTH_USER_MODEL = 'users.MyUser'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://ec2-3-76-221-49.eu-central-1.compute.amazonaws.com:8000"
 ]
