@@ -52,7 +52,6 @@ class WhoAmIView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
     
-''' Profile Photo upload -- Test It --
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -110,5 +109,3 @@ class ProfileView(APIView):
         # Serialize and return the updated user profile
         serializer = UserSerializer(data=user_profile)
         return ResponseFormatter.format_response(serializer.data, http_code=status.HTTP_200_OK, message="User profile updated successfully.")
-
-'''
