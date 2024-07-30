@@ -16,4 +16,3 @@ Pillow
 langchain_core
 langchain_postgres
 langchain_community
-

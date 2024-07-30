@@ -8,6 +8,7 @@ from rest_framework import status
 from backend.utils import ResponseFormatter
 from users.models import CVLanguage, CVInformation, CVExperience, CVEducation, CVSkill, CVCertification, CVProject, CVProjectLanguage
 import json
+from langchain.vector_lang import create_cv_data, delete_cv_language, add_cv_language, create_cv_certification, create_cv_education, create_cv_experience, create_cv_project, create_cv_skill
 import boto3
 from botocore.exceptions import ClientError
 import os
@@ -48,6 +49,7 @@ class UserCVUploadAPIView(APIView):
                 
                 # Save the CV data to the database
                 self.createCVs(cv, user.id)
+                create_cv_data(cv, user.id)
             except ClientError as e:
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
             except Exception as e:
@@ -266,6 +268,8 @@ class UserCVProjectAddAPIView(APIView):
                 project_name=project_name,
                 description=description
             )
+            project_data = {"project_name": project_name, "description": description, "languages": languages}
+            create_cv_project(project_data=project_data, user_id=user.id)
             if not isinstance(languages, list):
                 languages = [languages]
             for language in languages:
@@ -293,6 +297,7 @@ class UserAddorDeleteCVLanguageAPIView(APIView):
                 user=user,
                 language=language
             )
+            add_cv_language(user.id, language)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -311,6 +316,7 @@ class UserAddorDeleteCVLanguageAPIView(APIView):
                 language=language
             )
             object.delete()
+            delete_cv_language(user.id, language)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Language {language} not found.")
         
@@ -341,6 +347,15 @@ class UserAddorDeleteCVExperienceAPIView(APIView):
                 start_date=start_date,
                 end_date=end_date
             )
+            experience_data = {
+                'company_name': company_name,
+                'description': description,
+                'position': position,
+                'location': location,
+                'start_date': start_date,
+                'end_date': end_date
+            }
+            create_cv_experience(experience_data, user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -387,6 +402,14 @@ class UserAddorDeleteCVEducationAPIView(APIView):
                 start_date=start_date,
                 end_date=end_date
             )
+            education_data = {
+                'degree': degree,
+                'school': school,
+                'location': location,
+                'start_date': start_date,
+                'end_date': end_date
+            }
+            create_cv_education(education_data, user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -425,6 +448,7 @@ class UserAddorDeleteCVSkillAPIView(APIView):
                 user=user,
                 skill=skill
             )
+            create_cv_skill(skill_data=skill, user_id=user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -469,6 +493,13 @@ class UserAddorDeleteCVCertificationAPIView(APIView):
                 url=url,
                 date=date
             )
+            certification_data = {
+                'certification_name': certification_name,
+                'description': description,
+                'url': url,
+                'date': date
+            }
+            create_cv_certification(certification_data, user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
