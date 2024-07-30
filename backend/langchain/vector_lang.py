@@ -29,7 +29,7 @@ def add_documents(content):
             languages = ', '.join([lang['language'] for lang in item['github_project_languages']])
             page_content = f"{item['project_name']} {item['description']} {languages}"
             metadata = {
-                "id": item['id'],
+                "user_id": item['user'],
                 "languages": [
                     {"language": lang['language'], "percentage": lang['percentage']}
                     for lang in item['github_project_languages']

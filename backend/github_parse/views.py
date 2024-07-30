@@ -5,6 +5,7 @@ from rest_framework import generics
 from users.serializers import UserSerializer, GitHubProjectSerializer
 from users.models import MyUser, GitHubProject
 from rest_framework import status
+from langchain.vector_lang import add_documents
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
@@ -56,6 +57,7 @@ class GithubRepoView(APIView):
                 'description': description,
                 'github_project_languages': languages,
             }
+            add_documents(project_data)
             #print(project_data['languages'])
             project_serializer = GitHubProjectSerializer(data=project_data)
             if project_serializer.is_valid():
