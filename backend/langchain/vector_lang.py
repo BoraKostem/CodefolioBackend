@@ -1,19 +1,20 @@
 from langchain_core.documents import Document
 from langchain_postgres import PGVector
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.embeddings import BedrockEmbeddings
 import os
-
+import json
 # Environment setup
-os.environ["LANGSMITH_API_KEY"] = "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"
-os.environ["LANGSMITH_TRACING"] = "true"
 os.environ["AWS_DEFAULT_REGION"] = "eu-central-1"
 
 # Database connection setup
 connection = "postgresql+psycopg://langchain:12345678@codefolio-1.c5uiksm6gkn7.eu-central-1.rds.amazonaws.com:5432/vector_test"
-collection_name = "ollama_embeddings"
+collection_name = "aws_bedrock"
 
 # Initialize embeddings and vector store
-embeddings = OllamaEmbeddings(model="mxbai-embed-large")
+embeddings = BedrockEmbeddings(
+    model_id="cohere.embed-multilingual-v3"
+)
+
 vectorstore = PGVector(
     embeddings=embeddings,
     collection_name=collection_name,
@@ -81,38 +82,39 @@ def create_cv_data(cv_json, user_id):
 # Sample functions (placeholders for actual implementation)
 def create_cv_language(language_data, user_id):
     # Implement logic to create or store CV language data
-    doc = Document(page_content=language_data,metadata={"user_id":user_id, "type":"cv_languages","language":language_data})
-    vectorstore.add_documents(doc)
+    doc = Document(page_content=json.dumps(language_data),metadata={"user_id":user_id, "type":"cv_languages","language":language_data})
+    vectorstore.add_documents([doc])
     
 #experience_id ekle metadataya
 def create_cv_experience(experience_data, user_id):
+    print(json.dumps(experience_data))
     # Implement logic to create or store CV language data
-    doc = Document(page_content=experience_data,metadata={"user_id":user_id, "type":"cv_experiences","experience_id":experience_data.id})
-    vectorstore.add_documents(doc)
+    doc = Document(page_content=json.dumps(experience_data),metadata={"user_id":user_id, "type":"cv_experiences","experience_id":experience_data['id']})
+    vectorstore.add_documents([doc])
 
 #education_id ekle
 def create_cv_education(education_data, user_id):
     # Implement logic to create or store CV language data
-    doc = Document(page_content=education_data,metadata={"user_id":user_id, "type":"cv_educations","education_id":education_data.id})
-    vectorstore.add_documents(doc)
+    doc = Document(page_content=json.dumps(education_data),metadata={"user_id":user_id, "type":"cv_educations","education_id":education_data['id']})
+    vectorstore.add_documents([doc])
 
 #user_id + cv_skill unique
 def create_cv_skill(skill_data, user_id):
     # Implement logic to create or store CV skill data
-    doc = Document(page_content=skill_data,metadata={"user_id":user_id, "type":"cv_skills","skill":skill_data.skill})
-    vectorstore.add_documents(doc)
+    doc = Document(page_content=json.dumps(skill_data),metadata={"user_id":user_id, "type":"cv_skills","skill":skill_data["skill"]})
+    vectorstore.add_documents([doc])
 
 #certification_id ekle 
 def create_cv_certification(certification_data, user_id):
     # Implement logic to create or store CV certification data
-    doc = Document(page_content=certification_data,metadata={"user_id":user_id, "type":"cv_certifications","certification_id":certification_data.id})
-    vectorstore.add_documents(doc)
+    doc = Document(page_content=json.dumps(certification_data),metadata={"user_id":user_id, "type":"cv_certifications","certification_id":certification_data['id']})
+    vectorstore.add_documents([doc])
 
 #project_id ekle
 def create_cv_project(project_data, user_id):
     # Implement logic to create or store CV project data
-    doc = Document(page_content=project_data,metadata={"user_id":user_id, "type":"cv_projects","project_id":project_data.id})
-    vectorstore.add_documents(doc)
+    doc = Document(page_content=json.dumps(project_data),metadata={"user_id":user_id, "type":"cv_projects","project_id":project_data['id']})
+    vectorstore.add_documents([doc])
 
 # spesifik vektörü silme
 def delete_vector(user_id):

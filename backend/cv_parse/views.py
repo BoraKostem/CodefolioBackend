@@ -49,7 +49,9 @@ class UserCVUploadAPIView(APIView):
                 
                 # Save the CV data to the database
                 self.createCVs(cv, user.id)
-                create_cv_data(cv, user.id)
+                #print("CV data saved successfully")
+                db_cv = UserCVAPIView.getCVs(user)
+                create_cv_data(db_cv, user.id)
             except ClientError as e:
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
             except Exception as e:
@@ -150,6 +152,10 @@ class UserCVAPIView(APIView):
         if not user.is_authenticated:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
         
+        cv = self.getCVs(user)
+
+        return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)
+    def getCVs(user):
         cv_info = CVInformation.objects.filter(user=user)
         cv_languages = CVLanguage.objects.filter(user=user)
         cv_experiences = CVExperience.objects.filter(user=user)
@@ -178,8 +184,7 @@ class UserCVAPIView(APIView):
             'cv_certifications': cv_certifications.data,
             'cv_projects': cv_projects.data
         }
-
-        return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)
+        return cv
     
 class UserCVProjectEditAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -293,11 +298,12 @@ class UserAddorDeleteCVLanguageAPIView(APIView):
         if not language:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'language' field is required.")
         try:
-            CVLanguage.objects.get_or_create(
+            lang = CVLanguage.objects.get_or_create(
                 user=user,
                 language=language
             )
-            add_cv_language(user.id, language)
+            ser = CVLanguageSerializer(lang, many=False)
+            add_cv_language(user.id, ser)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -338,7 +344,7 @@ class UserAddorDeleteCVExperienceAPIView(APIView):
         if not company_name or not description or not position or not location or not start_date:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'company_name', 'description', 'position', 'location' and 'start_date' fields are required | 'end_date' is optional. Format: MM/YYYY")
         try:
-            CVExperience.objects.create(
+            exp = CVExperience.objects.create(
                 user=user,
                 company_name=company_name,
                 description=description,
@@ -347,15 +353,8 @@ class UserAddorDeleteCVExperienceAPIView(APIView):
                 start_date=start_date,
                 end_date=end_date
             )
-            experience_data = {
-                'company_name': company_name,
-                'description': description,
-                'position': position,
-                'location': location,
-                'start_date': start_date,
-                'end_date': end_date
-            }
-            create_cv_experience(experience_data, user.id)
+            ser = CVExperienceSerializer(exp, many=False)
+            create_cv_experience(ser, user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -394,7 +393,7 @@ class UserAddorDeleteCVEducationAPIView(APIView):
         if not degree or not school or not location or not start_date:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'degree', 'school', 'location' and 'start_date' fields are required | 'end_date' is optional. Format: MM/YYYY")
         try:
-            CVEducation.objects.create(
+            edu = CVEducation.objects.create(
                 user=user,
                 degree=degree,
                 school=school,
@@ -402,14 +401,8 @@ class UserAddorDeleteCVEducationAPIView(APIView):
                 start_date=start_date,
                 end_date=end_date
             )
-            education_data = {
-                'degree': degree,
-                'school': school,
-                'location': location,
-                'start_date': start_date,
-                'end_date': end_date
-            }
-            create_cv_education(education_data, user.id)
+            ser = CVEducationSerializer(edu, many=False)
+            create_cv_education(ser, user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -444,11 +437,12 @@ class UserAddorDeleteCVSkillAPIView(APIView):
         if not skill:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'skill' field is required.")
         try:
-            CVSkill.objects.get_or_create(
+            skill = CVSkill.objects.get_or_create(
                 user=user,
                 skill=skill
             )
-            create_cv_skill(skill_data=skill, user_id=user.id)
+            ser = CVSkillSerializer(skill, many=False)
+            create_cv_skill(skill_data=ser, user_id=user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -486,20 +480,15 @@ class UserAddorDeleteCVCertificationAPIView(APIView):
         if not certification_name or not description or not url or not date:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'certification_name', 'description', 'url' and 'date' fields are required.")
         try:
-            CVCertification.objects.create(
+            cer = CVCertification.objects.create(
                 user=user,
                 certification_name=certification_name,
                 description=description,
                 url=url,
                 date=date
             )
-            certification_data = {
-                'certification_name': certification_name,
-                'description': description,
-                'url': url,
-                'date': date
-            }
-            create_cv_certification(certification_data, user.id)
+            ser = CVCertificationSerializer(cer, many=False)
+            create_cv_certification(ser, user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
