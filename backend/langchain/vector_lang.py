@@ -120,7 +120,7 @@ def create_cv_project(project_data, user_id):
 def delete_vector(user_id):
     try:
         # Fetch the document IDs to delete
-        documents_to_delete = vectorstore.get_documents_by_metadata({"user_id": user_id})
+        documents_to_delete = vectorstore.get_by_ids({"user_id": user_id})
         if not documents_to_delete:
             return f"No documents found for user_id: {user_id}"
 
@@ -183,7 +183,7 @@ def edit_about(user_id, new_about):
 
         # Delete the old document
         old_document_id = documents_to_update[0].metadata['id']
-        vectorstore.delete_documents([old_document_id])
+        vectorstore._delete_collection([old_document_id])
 
         # Create the new document
         metadata = {
@@ -197,8 +197,43 @@ def edit_about(user_id, new_about):
         return f"Document for user_id: {user_id} with type 'about' updated successfully"
     except Exception as e:
         return str(e)
+
+# Deleting the user cv project's by receiving the user id and the project id  
+def user_cv_project_delete(user_id: int, project_id: str, **kwargs: Any) -> None:
+    try:
+        # Fetch all documents associated with the user_id
+        user_documents = vectorstore.get_by_ids([user_id])  # Adjust method if needed
+        
+        # Find the document with the matching project_id
+        document_to_delete = None
+        for doc in user_documents:
+            # Load the page_content to access metadata
+            metadata = json.loads(doc.page_content)
+            if metadata.get('project_id') == project_id:
+                document_to_delete = doc.metadata.get('id')  # Adjust if your document ID is stored differently
+                break
+        
+        if document_to_delete:
+            # Using the 'delete' method to delete the document based on its ID
+            vectorstore.delete(ids=[document_to_delete], **kwargs)
+            print(f"Project with ID {project_id} for user {user_id} deleted successfully.")
+        else:
+            print(f"No project found with ID {project_id} for user {user_id}.")
+    except Exception as e:
+        print(f"An error occurred while deleting the project {project_id} for user {user_id}: {e}")
+
+        
+
+
+
+
+
+
+
     
-    # CV project,description editleme
+
+
+
 
 
 
