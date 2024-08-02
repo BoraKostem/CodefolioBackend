@@ -28,6 +28,9 @@ class UserCVUploadAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        file = request.FILES['cv']
+        if not file:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'cv' field is required.")
         serializer = UserCVSerializer(data=request.data)
 
         user = request.user
@@ -36,7 +39,6 @@ class UserCVUploadAPIView(APIView):
 
         if serializer.is_valid():
             # Get the file from the request and parse it to extract the CV data
-            file = request.FILES['cv']
             cv = cv_parser(file)
             try:
                 # Save the CV data to the database
