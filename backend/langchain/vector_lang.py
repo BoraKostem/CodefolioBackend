@@ -164,7 +164,7 @@ def delete_cv_language(user_id, language_id):
 
         # Delete the documents
         document_ids = [doc.metadata['id'] for doc in documents_to_delete]
-        vectorstore.delete_documents(document_ids)
+        vectorstore.delete(document_ids)
         return f"Language with id: {language_id} deleted successfully for user_id: {user_id}"
     except Exception as e:
         return str(e)
@@ -199,7 +199,7 @@ def edit_about(user_id, new_about):
         return str(e)
 
 # Deleting the user cv project's by receiving the user id and the project id  
-def user_cv_project_delete(user_id: int, project_id: str, **kwargs: Any) -> None:
+def user_cv_project_delete(user_id: int, project_id: str) -> None:
     try:
         # Fetch all documents associated with the user_id
         user_documents = vectorstore.get_by_ids([user_id])  # Adjust method if needed
@@ -215,14 +215,72 @@ def user_cv_project_delete(user_id: int, project_id: str, **kwargs: Any) -> None
         
         if document_to_delete:
             # Using the 'delete' method to delete the document based on its ID
-            vectorstore.delete(ids=[document_to_delete], **kwargs)
+            vectorstore.delete(ids=[document_to_delete])
             print(f"Project with ID {project_id} for user {user_id} deleted successfully.")
         else:
             print(f"No project found with ID {project_id} for user {user_id}.")
     except Exception as e:
         print(f"An error occurred while deleting the project {project_id} for user {user_id}: {e}")
 
+def user_cv_project_update(user_id: int, project_id: str, project_data: dict) -> None:
+    try:
+        # Create a new document with the updated project data
+        doc = Document(page_content=json.dumps(project_data), metadata={"user_id": user_id, "type": "cv_projects", "project_id": project_id})
         
+        # Using the 'add_documents' method to update the vector store with the new document
+        vectorstore.add_documents([doc])
+        print(f"Project with ID {project_id} for user {user_id} updated successfully in vector store.")
+    except Exception as e:
+        print(f"An error occurred while updating the project {project_id} for user {user_id} in vector store: {e}")
+
+
+def delete_pgvector_experience(experience_id: str, user_id: int) -> None:
+    try:
+        # Fetch documents with the specific user_id and experience_id from vectorstore
+        documents = vectorstore.get_by_ids([experience_id])
+        
+        # Filter documents to match both user_id and experience_id
+        ids_to_delete = [doc.id for doc in documents if doc.metadata.get("user_id") == user_id and doc.metadata.get("experience_id") == experience_id]
+        
+        if ids_to_delete:
+            # Use the built-in delete function to remove the documents
+            vectorstore.delete(ids=ids_to_delete)
+            print(f"Deleted vectors with experience_id {experience_id} for user {user_id}.")
+        else:
+            print(f"No vectors found for experience_id {experience_id} for user {user_id}.")
+            
+    except Exception as e:
+        print(f"An error occurred while deleting vectors for experience_id {experience_id} for user {user_id}: {e}")
+
+
+def delete_cv_skill(user_id, skill):
+    # Fetch all documents for the user
+    documents = vectorstore.get_by_ids([user_id])
+
+    # Filter documents to find those matching the skill
+    ids_to_delete = [doc.id for doc in documents if doc.metadata.get("user_id") == user_id and doc.metadata.get("skill") == skill]
+
+    # Delete the documents
+    vectorstore.delete(ids=ids_to_delete)
+
+
+def delete_cv_certification(user_id: int, certification_id: int) -> None:
+    # Step 1: Fetch documents by user_id and certification_id
+    # You need to know the IDs of the documents you want to delete.
+    # Assuming `get_by_ids` method can be used to get documents.
+    
+    # Example method to fetch document IDs based on metadata
+    all_docs = vectorstore.get_by_ids([str(user_id)])  # Fetch all docs for a specific user_id
+    ids_to_delete = []
+    
+    for doc in all_docs:
+        # Check if this document matches the certification_id
+        if doc.metadata.get('type') == 'cv_certifications' and doc.metadata.get('certification_id') == certification_id:
+            ids_to_delete.append(doc.id)  # Collect IDs of documents to be deleted
+
+    # Step 2: Delete documents by their IDs
+    if ids_to_delete:
+        vectorstore.delete(ids=ids_to_delete)
 
 
 
