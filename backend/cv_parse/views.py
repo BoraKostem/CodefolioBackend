@@ -28,6 +28,9 @@ class UserCVUploadAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        file = request.FILES['cv']
+        if not file:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="The 'cv' field is required.")
         serializer = UserCVSerializer(data=request.data)
 
         user = request.user
@@ -36,7 +39,6 @@ class UserCVUploadAPIView(APIView):
 
         if serializer.is_valid():
             # Get the file from the request and parse it to extract the CV data
-            file = request.FILES['cv']
             cv = cv_parser(file)
             try:
                 # Save the CV data to the database
@@ -50,7 +52,7 @@ class UserCVUploadAPIView(APIView):
                 # Save the CV data to the database
                 self.createCVs(cv, user.id)
                 #print("CV data saved successfully")
-                db_cv = UserCVAPIView.getCVs(user)
+                db_cv = CV.getCVs(user)
                 create_cv_data(db_cv, user.id)
             except ClientError as e:
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
@@ -152,9 +154,12 @@ class UserCVAPIView(APIView):
         if not user.is_authenticated:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_401_UNAUTHORIZED, message="User is not authenticated.")
         
-        cv = self.getCVs(user)
+        cv = CV.getCVs(user)
 
         return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)
+    
+    
+class CV():
     def getCVs(user):
         cv_info = CVInformation.objects.filter(user=user)
         cv_languages = CVLanguage.objects.filter(user=user)
@@ -185,7 +190,6 @@ class UserCVAPIView(APIView):
             'cv_projects': cv_projects.data
         }
         return cv
-    
 class UserCVProjectEditAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

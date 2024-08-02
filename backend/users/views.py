@@ -50,7 +50,18 @@ class WhoAmIView(APIView):
         # The request.user will be set to the authenticated user by the JWTAuthentication class
         user = request.user
         serializer = UserSerializer(user)
-        return Response(serializer.data)
+        data = serializer.data
+        about = ''  # Initialize an empty string for 'about'
+        if 'cv_information' in data:
+            # Iterate over each item in 'cv_information'
+            for cv_info in data['cv_information']:
+                if cv_info.get('headline') == 'about':
+                    about = cv_info.get('info', '')
+                    break  # Exit the loop once the 'about' info is found
+            # Remove 'cv_information' from data and add 'about'
+            data.pop('cv_information', None)
+            data['about'] = about
+        return Response(data)
     
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
