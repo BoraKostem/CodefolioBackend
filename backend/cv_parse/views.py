@@ -8,7 +8,7 @@ from rest_framework import status
 from backend.utils import ResponseFormatter
 from users.models import CVLanguage, CVInformation, CVExperience, CVEducation, CVSkill, CVCertification, CVProject, CVProjectLanguage
 import json
-from langchain.vector_lang import create_cv_data, delete_cv_language, add_cv_language, create_cv_certification, create_cv_education, create_cv_experience, create_cv_project, create_cv_skill
+from langchain.vector_lang import create_cv_data, delete_cv_language, add_cv_language, create_cv_certification, create_cv_education, create_cv_experience, create_cv_project, create_cv_skill, user_cv_project_delete,user_cv_project_update,delete_pgvector_experience,delete_cv_skill,delete_cv_certification
 import boto3
 from botocore.exceptions import ClientError
 import os
@@ -158,7 +158,7 @@ class UserCVAPIView(APIView):
 
         return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)
     
-    
+
 class CV():
     def getCVs(user):
         cv_info = CVInformation.objects.filter(user=user)
@@ -190,6 +190,8 @@ class CV():
             'cv_projects': cv_projects.data
         }
         return cv
+
+#edit function for update cv project is added inside vector_lang
 class UserCVProjectEditAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -220,11 +222,20 @@ class UserCVProjectEditAPIView(APIView):
                 )
         try:
             project.save()
+             # Prepare project data for vector update
+            project_data = {
+                "id": project_id,
+                "description": new_description if new_description else project.description,
+                "languages": languages if languages else list(project.cvprojectlanguage_set.values_list('language', flat=True))
+            }
+            # Call the user_cv_project_update function after saving the project
+            user_cv_project_update(user.id, project_id, project_data)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
         return ResponseFormatter.format_response(CVProjectSerializer(project).data, http_code=status.HTTP_200_OK)
     
+#delete function for delete cv project is added inside vector_lang
 class UserCVProjectDeleteAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -254,6 +265,7 @@ class UserCVProjectDeleteAPIView(APIView):
         else:
             try:
                 project.delete()
+                user_cv_project_delete(user.id, project_id)
             except Exception as e:
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -291,6 +303,7 @@ class UserCVProjectAddAPIView(APIView):
         
         return ResponseFormatter.format_response(CVProjectSerializer(project).data, http_code=status.HTTP_200_OK)
 
+#deleting cv language inside pgvector is added to vector_lang and in here also
 class UserAddorDeleteCVLanguageAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -332,6 +345,7 @@ class UserAddorDeleteCVLanguageAPIView(APIView):
         
         return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
     
+#deleting cv experience inside pgvector is added to vector_lang and in here also
 class UserAddorDeleteCVExperienceAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -377,11 +391,14 @@ class UserAddorDeleteCVExperienceAPIView(APIView):
                 id=experience_id
             ) 
             object.delete()
+            delete_pgvector_experience(experience_id, user.id)  # Use experience_id and user.id
+
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Experience not found.")
         
         return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
     
+# it is not complete
 class UserAddorDeleteCVEducationAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -429,7 +446,8 @@ class UserAddorDeleteCVEducationAPIView(APIView):
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Education not found.")
         
         return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
-    
+
+# delete operation of pgvector insdie AddOrDeleteCVskill is created and added in here  
 class UserAddorDeleteCVSkillAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -465,11 +483,13 @@ class UserAddorDeleteCVSkillAPIView(APIView):
                 skill=skill
             )
             object.delete()
+            delete_cv_skill(user.id, skill)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Skill {skill} not found.")
         
         return ResponseFormatter.format_response(None, http_code=status.HTTP_200_OK)
 
+#delete operation is created for cv_certification.
 class UserAddorDeleteCVCertificationAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -511,6 +531,8 @@ class UserAddorDeleteCVCertificationAPIView(APIView):
                 id=certification_id
             )  
             object.delete()
+                    # Call the function to delete the corresponding vector from pgvector
+            delete_cv_certification(user.id, certification_id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Certification not found.")
         
