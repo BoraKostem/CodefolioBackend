@@ -5,7 +5,7 @@ from rest_framework import generics
 from users.serializers import UserSerializer, GitHubProjectSerializer
 from users.models import MyUser, GitHubProject
 from rest_framework import status
-from langchain.vector_lang import add_documents
+from langchain.vector_lang import add_documents, delete_github_project
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
@@ -39,7 +39,8 @@ class GithubRepoView(APIView):
             return ResponseFormatter.format_response(user_serializer.errors, http_code=status.HTTP_400_BAD_REQUEST)
         
         GitHubProject.objects.filter(user=user).delete()
-
+        delete_github_project(user.id)
+        
         username = url.split('/')[-1]
         repos = GithubRepo.fetch_github_repos(username)
         if type(repos) == ValueError:
@@ -57,7 +58,8 @@ class GithubRepoView(APIView):
                 'description': description,
                 'github_project_languages': languages,
             }
-            add_documents(project_data)
+            x = add_documents(project_data)
+            print(x)
             #print(project_data['languages'])
             project_serializer = GitHubProjectSerializer(data=project_data)
             if project_serializer.is_valid():

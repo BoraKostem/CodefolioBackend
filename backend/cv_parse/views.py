@@ -8,7 +8,7 @@ from rest_framework import status
 from backend.utils import ResponseFormatter
 from users.models import CVLanguage, CVInformation, CVExperience, CVEducation, CVSkill, CVCertification, CVProject, CVProjectLanguage
 import json
-from langchain.vector_lang import create_cv_data, delete_cv_language, add_cv_language, create_cv_certification, create_cv_education, create_cv_experience, create_cv_project, create_cv_skill, user_cv_project_delete,user_cv_project_update,delete_pgvector_experience,delete_cv_skill,delete_cv_certification
+from langchain.vector_lang import create_cv_data, delete_cv_language, add_cv_language, create_cv_certification, create_cv_education, create_cv_experience, create_cv_project, create_cv_skill, user_cv_project_delete,user_cv_project_update,delete_pgvector_experience,delete_cv_skill,delete_cv_certification, delete_cv_education
 import boto3
 from botocore.exceptions import ClientError
 import os
@@ -222,14 +222,9 @@ class UserCVProjectEditAPIView(APIView):
                 )
         try:
             project.save()
-             # Prepare project data for vector update
-            project_data = {
-                "id": project_id,
-                "description": new_description if new_description else project.description,
-                "languages": languages if languages else list(project.cvprojectlanguage_set.values_list('language', flat=True))
-            }
-            # Call the user_cv_project_update function after saving the project
-            user_cv_project_update(user.id, project_id, project_data)
+            serializer = CVProjectSerializer(project)
+            x= user_cv_project_update(user.id, project_id, serializer.data)
+            print(x)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -265,7 +260,8 @@ class UserCVProjectDeleteAPIView(APIView):
         else:
             try:
                 project.delete()
-                user_cv_project_delete(user.id, project_id)
+                x= user_cv_project_delete(user.id, project_id)
+                print(x)
             except Exception as e:
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
         
@@ -391,8 +387,8 @@ class UserAddorDeleteCVExperienceAPIView(APIView):
                 id=experience_id
             ) 
             object.delete()
-            delete_pgvector_experience(experience_id, user.id)  # Use experience_id and user.id
-
+            x = delete_pgvector_experience(experience_id, user.id)  # Use experience_id and user.id
+            print(x)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Experience not found.")
         
@@ -442,6 +438,7 @@ class UserAddorDeleteCVEducationAPIView(APIView):
                 id=education_id
             )
             object.delete()
+            delete_cv_education(education_id=education_id, user_id=user.id)
         except Exception as e:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message=f"Education not found.")
         
