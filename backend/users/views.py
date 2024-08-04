@@ -14,6 +14,7 @@ from rest_framework import status
 from datetime import datetime
 from PIL import Image
 import boto3
+from botocore.exceptions import BotoCoreError, ClientError
 import os
 from pathlib import Path
 import environ
@@ -93,30 +94,39 @@ class ProfileView(APIView):
         def upload_to_s3(file, bucket_name, object_name=None):
             if object_name is None:
                 object_name = file.name
-            response = s3_client.upload_fileobj(file, bucket_name, object_name)
-            file_name = file.name + datetime.now().strftime("%Y%m%d%H%M%S")
+            _, file_extension = os.path.splitext(file.name)
+            file_name_without_extension = os.path.splitext(file.name)[0]
+            datetime_string = datetime.now().strftime("%Y%m%d%H%M%S")
+            file_name = f"{file_name_without_extension}{datetime_string}{file_extension}"
             file_key = f"user_profile/{user.id}/{file_name}"
-            file_content = file.read()
             # Upload the file to S3
-            s3_client.put_object(Bucket=bucket_name, Key=file_key, Body=file_content)
-            if response is None:
-                return None
-            return f"https://{bucket_name}.s3.eu-central-1.amazonaws.com/{file_key}"
-        
+            try:
+                s3_client.upload_fileobj(file, bucket_name, file_key)
+                return f"https://{bucket_name}.s3.eu-central-1.amazonaws.com/{file_key}"
+            except (BotoCoreError, ClientError) as error:
+                # Handle the exception (log it, return it, etc.)
+                return error
+
         # Update or create user profile with URLs
-        user_profile = MyUser.objects.get(id=user)
+        user_profile = MyUser.objects.get(id=user.id)
 
         if profile_photo:
             profile_photo_url = upload_to_s3(profile_photo, bucket)
             user_profile.profile_photo = profile_photo_url
+            if isinstance(profile_photo_url, (BotoCoreError,ClientError)):
+                return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="Failed to upload profile photo.")
+                
         if background_photo:
             background_photo_url = upload_to_s3(background_photo, bucket)
             user_profile.profile_background = background_photo_url
+            if isinstance(background_photo_url, (BotoCoreError,ClientError)):
+                return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="Failed to upload background photo.")
         try:
             user_profile.save()
         except:
             return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="Failed to update user profile.")
 
         # Serialize and return the updated user profile
-        serializer = UserSerializer(data=user_profile)
+        serializer = UserSerializer(user_profile)
+
         return ResponseFormatter.format_response(serializer.data, http_code=status.HTTP_200_OK, message="User profile updated successfully.")
