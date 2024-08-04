@@ -44,6 +44,41 @@ class LoginView(APIView):
             })
         return Response({'error': 'Invalid Credentials'}, status=400)
     
+class PublicProfileView(APIView):
+    def get(self, request):
+        try:
+            user_id = request.query_params.get('id')
+            if not user_id:
+                return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="User ID is required")
+            user = MyUser.objects.get(id=user_id)
+        except MyUser.DoesNotExist:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message="User not found.")
+        serializer = UserSerializer(user)
+        data = serializer.data
+        about = ''  # Initialize an empty string for 'about'
+        if 'cv_information' in data:
+            # Iterate over each item in 'cv_information'
+            for cv_info in data['cv_information']:
+                if cv_info.get('headline') == 'about':
+                    about = cv_info.get('info', '')
+                    break  # Exit the loop once the 'about' info is found
+            # Remove 'cv_information' from data and add 'about'
+            data.pop('cv_information', None)
+            data['about'] = about
+        return Response(data)
+
+class PublicSearchView(APIView):
+    def get(self, request):
+        try:
+            search_query = request.query_params.get('q')
+            if not search_query:
+                return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="Search query is required")
+            users = MyUser.objects.filter(email__icontains=search_query)
+        except MyUser.DoesNotExist:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message="No users found.")
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
 class WhoAmIView(APIView):
     permission_classes = [IsAuthenticated]
 
