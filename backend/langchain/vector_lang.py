@@ -297,5 +297,24 @@ def delete_cv_language(user_id, language):
     except:
         print(f"An error occurred while deleting the language '{language}' for user {user_id}.")
 
-def search_ml(search):
-    vectorstore.similarity_search(search, k=10)
+def search_ml(search, page=1, offset=10):
+    # Perform the search
+    all_results = vectorstore.similarity_search(search, k=1000)  # Fetch more results than needed
+
+    # Filter for unique metadata.user_id
+    seen_user_ids = set()
+    unique_results = []
+    for result in all_results:
+        user_id = result.metadata['user_id']
+        if user_id not in seen_user_ids:
+            seen_user_ids.add(user_id)
+            unique_results.append(result)
+
+    # Calculate start and end indices for pagination on the filtered results
+    start_index = (page - 1) * offset
+    end_index = start_index + offset
+
+    # Apply pagination to the unique results
+    paginated_unique_results = unique_results[start_index:end_index]
+
+    return paginated_unique_results

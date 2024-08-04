@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate
 from backend.utils import ResponseFormatter
 from rest_framework import status
 from datetime import datetime
+from langchain.vector_lang import search_ml
 from PIL import Image
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
@@ -70,14 +71,28 @@ class PublicProfileView(APIView):
 class PublicSearchView(APIView):
     def get(self, request):
         try:
-            search_query = request.query_params.get('q')
-            if not search_query:
-                return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="Search query is required")
-            users = MyUser.objects.filter(email__icontains=search_query)
-        except MyUser.DoesNotExist:
-            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message="No users found.")
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+            query = request.query_params.get('q', '')
+            page = request.query_params.get('page', 1)
+            offset = request.query_params.get('offset', 10)
+            users = search_ml(query, page, offset)
+            results = []
+            for user in users:
+                myuser = MyUser.objects.get(id=user.metadata['user_id'])
+                data = {
+                    'id': myuser.id,
+                    'email': myuser.email,
+                    'name': myuser.name,
+                    'location': myuser.location,
+                    'phone': myuser.phone,
+                    'github_url': myuser.github_url,
+                    'linkedin_url': myuser.linkedin_url,
+                    'profile_photo': myuser.profile_photo,
+                }
+                results.append(data)
+            return ResponseFormatter.format_response(results, http_code=status.HTTP_200_OK, message="Users found successfully.")
+        except Exception as e:
+            print(e)
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="Failed to search users.")
 
 class WhoAmIView(APIView):
     permission_classes = [IsAuthenticated]
