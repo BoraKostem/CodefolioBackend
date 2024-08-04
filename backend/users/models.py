@@ -45,7 +45,7 @@ class CVLanguage(models.Model):
 
 class CVInformation(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
-    user = models.ForeignKey(MyUser, related_name='cv_informations', on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, related_name='cv_information', on_delete=models.CASCADE)
     headline = models.CharField(max_length=255)
     info = models.TextField()
     class Meta:
