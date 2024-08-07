@@ -17,6 +17,9 @@ langchain.verbose = False
 langchain.debug = False
 langchain.llm_cache = False
 
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ["LANGCHAIN_API_KEY"] = env('LANGCHAIN_API_KEY')
 os.environ["AWS_DEFAULT_REGION"] = "eu-central-1"
 
 llm = ChatBedrock(
