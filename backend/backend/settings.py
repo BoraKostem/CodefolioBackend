@@ -160,5 +160,6 @@ AUTH_USER_MODEL = 'users.MyUser'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://ec2-3-76-221-49.eu-central-1.compute.amazonaws.com:8000"
+    "http://ec2-3-76-221-49.eu-central-1.compute.amazonaws.com:8000",
+    "https://main.d3v3s4uega3ud3.amplifyapp.com"
 ]

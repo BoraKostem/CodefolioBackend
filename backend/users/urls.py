@@ -19,5 +19,5 @@ urlpatterns = [
     path('profile/photo', ProfileView.as_view(), name='profile_photo'),
     path('profile/public', PublicProfileView.as_view(), name='public_profile'),
     path('search', PublicSearchView.as_view(), name='search'),
-    path('whoami/', WhoAmIView.as_view(), name='whoami'),
+    path('whoami', WhoAmIView.as_view(), name='whoami'),
 ]

@@ -61,7 +61,7 @@ class UserCVUploadAPIView(APIView):
                 return ResponseFormatter.format_response(None, http_code=status.HTTP_500_INTERNAL_SERVER_ERROR, message=str(e))
 
             
-            return ResponseFormatter.format_response(cv, http_code=status.HTTP_200_OK)
+            return ResponseFormatter.format_response(db_cv, http_code=status.HTTP_200_OK)
         else:
             return ResponseFormatter.format_response(None , http_code=status.HTTP_400_BAD_REQUEST, message=serializer._errors)
         
@@ -84,7 +84,10 @@ class UserCVUploadAPIView(APIView):
         cv_skills = cv_json['cv_skills']
         cv_certifications = cv_json['cv_certifications']
         cv_projects = cv_json['cv_projects']
-
+        print(cv_experiences)
+        print(cv_educations)
+        print(cv_skills)
+        print(cv_certifications)
         # Create CV Projects
         for cv_project in cv_projects:
             cv_project['user'] = user

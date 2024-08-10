@@ -56,21 +56,21 @@ the output should be like this: (do not change the layout of the output, just fi
       ],
     "cv_experience": [
         
-          "company_name": "String",
-          "description": "String", (job title, responsibilities, etc.)
-          "position": "String",
-          "location": "String",
-          "start_date": "String",
-          "end_date": "String",
+          'company_name', 
+          'description', 
+          'position', 
+          'location', 
+          'start_date', 
+          'end_date'
         
       ],
     "cv_education": [
         
-          "degree": "String",
-          "school": "String",
-          "location": "String",
-          "start_date": "String",
-          "end_date": "String",
+          'degree', 
+          'school', 
+          'location', 
+          'start_date', 
+          'end_date'
         
       ],
     "cv_skills": [
@@ -79,11 +79,10 @@ the output should be like this: (do not change the layout of the output, just fi
         
       ],
     "cv_certifications": [
-        
-          "certification": "String",
-          "date": "String",
-          "certification_url": "String"
-        
+          'certification_name', 
+          'description', 
+          'url', 
+          'date'
       ],
     "cv_projects": [
         

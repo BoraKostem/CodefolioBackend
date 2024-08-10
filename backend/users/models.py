@@ -53,41 +53,41 @@ class CVInformation(models.Model):
 
 class CVExperience(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_experiences', on_delete=models.CASCADE)
-    company_name = models.CharField(max_length=255)
+    company_name = models.TextField()
     description = models.TextField()
-    position = models.CharField(max_length=255)
-    location = models.CharField(max_length=255)
-    start_date = models.CharField(max_length=7)  # Format: MM/YYYY
-    end_date = models.CharField(max_length=7, null=True, blank=True)  # Format: MM/YYYY
+    position = models.TextField()
+    location = models.TextField()
+    start_date = models.CharField(max_length=57)  # Format: MM/YYYY
+    end_date = models.CharField(max_length=57, null=True, blank=True)  # Format: MM/YYYY
     is_manual_added = models.BooleanField(default=True)
 
 class CVEducation(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_education', on_delete=models.CASCADE)
-    degree = models.CharField(max_length=255)
-    school = models.CharField(max_length=255)
-    location = models.CharField(max_length=255)
-    start_date = models.CharField(max_length=7)  # Format: MM/YYYY
-    end_date = models.CharField(max_length=7, null=True, blank=True)  # Format: MM/YYYY
+    degree = models.TextField()
+    school = models.TextField()
+    location = models.TextField()
+    start_date = models.CharField(max_length=57)  # Format: MM/YYYY
+    end_date = models.CharField(max_length=57, null=True, blank=True)  # Format: MM/YYYY
     is_manual_added = models.BooleanField(default=True)
 
 class CVSkill(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_skills', on_delete=models.CASCADE)
-    skill = models.CharField(max_length=255)
+    skill = models.TextField()
     is_manual_added = models.BooleanField(default=True)
     class Meta:
         unique_together = ('user', 'skill',)
 
 class CVCertification(models.Model):
     user = models.ForeignKey(MyUser, related_name='cv_certifications', on_delete=models.CASCADE)
-    certification_name = models.CharField(max_length=255)
+    certification_name = models.TextField()
     description = models.TextField(null=True, blank=True)  # Optional
     url = models.URLField(null=True, blank=True)  # Optional
-    date = models.CharField(max_length=18)
+    date = models.CharField(max_length=58)
     is_manual_added = models.BooleanField(default=True)
 
 class CVProjectLanguage(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
-    language = models.CharField(max_length=255)
+    language = models.TextField()
     project = models.ForeignKey('CVProject', related_name='cv_project_languages', on_delete=models.CASCADE)
     class Meta:
         unique_together = ('language', 'project',)
@@ -95,7 +95,7 @@ class CVProjectLanguage(models.Model):
 class CVProject(models.Model):
     id = models.BigAutoField(primary_key=True, editable=False)
     user = models.ForeignKey(MyUser, related_name='cv_projects', on_delete=models.CASCADE)
-    project_name = models.CharField(max_length=255)
+    project_name = models.TextField()
     description = models.TextField()
     is_manual_added = models.BooleanField(default=True)
 
