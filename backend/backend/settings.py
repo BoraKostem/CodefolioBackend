@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'users',
     'github_parse',
     'corsheaders',
+    'langchain',
 ]
 
 MIDDLEWARE = [
@@ -163,3 +164,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://ec2-3-76-221-49.eu-central-1.compute.amazonaws.com:8000",
     "https://main.d3v3s4uega3ud3.amplifyapp.com"
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}

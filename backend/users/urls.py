@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import UserCreate, LoginView, WhoAmIView, ProfileView, PublicProfileView, PublicSearchView
 from github_parse.views import GithubRepoView
+from langchain.views import ChatView
 from cv_parse.views import UserCVUploadAPIView, UserCVAPIView, UserCVProjectEditAPIView, UserCVProjectDeleteAPIView, UserCVProjectAddAPIView, UserAddorDeleteCVSkillAPIView, UserAddorDeleteCVCertificationAPIView, UserAddorDeleteCVEducationAPIView, UserAddorDeleteCVExperienceAPIView, UserAddorDeleteCVLanguageAPIView
 urlpatterns = [
     path('register', UserCreate.as_view(), name='register'),
@@ -20,4 +21,5 @@ urlpatterns = [
     path('profile/public', PublicProfileView.as_view(), name='public_profile'),
     path('search', PublicSearchView.as_view(), name='search'),
     path('whoami', WhoAmIView.as_view(), name='whoami'),
+    path('chat', ChatView.as_view(), name='chat'),
 ]
