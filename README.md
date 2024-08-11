@@ -1,5 +1,33 @@
 # Codefolio Backend API Documentation
 
+## How to Run the Backend
+
+### Requirements
+- PostgreSQL with `pgvector` extension installed.
+- AWS IAM account with access to S3 and Bedrock models.
+
+### Setup Instructions
+1. Rename the `.env.copy` file to `.env`.
+2. Fill in the `.env` file with the appropriate values:
+   ```
+   POSTGRE_USER=<your_postgres_username>
+   POSTGRE_PASSWORD=<your_postgres_password>
+   POSTGRE_HOST=<your_postgres_host>
+   POSTGRE_PORT=<your_postgres_port>
+   GITHUB_TOKEN=<your_github_api_token>
+   LANGSMITH_TOKEN=<your_langsmith_api_token>
+   AWS_STORAGE_BUCKET_NAME=<your_aws_s3_bucket_name>
+   ```
+3. Run the following commands to install dependencies and set up the database:
+   ```bash
+   pip install -r requirements.txt
+   python backend/manage.py migrate
+   ```
+4. Start the server:
+   ```bash
+   python backend/manage.py runserver
+   ```
+
 ## Get Users (Public Endpoint)
 This endpoint retrieves the given user profile.
 
