@@ -6,8 +6,10 @@ import uuid
 from users.models import MyUser
 from django.utils import timezone
 from rest_framework import status
+from langchain_core.messages import AIMessage, HumanMessage
 from backend.utils import ResponseFormatter
 from .llm_communication import chat
+import pickle
 class ChatView(APIView):
     def post(self, request, *args, **kwargs):
         uuid1 = request.data.get("uuid")
@@ -35,3 +37,18 @@ class ChatView(APIView):
         response = chat(chat_uuid=uuid1, person_name=user_name, user_id=user_id, input_message=input)
 
         return ResponseFormatter.format_response({"response": response, "uuid": uuid1}, http_code=status.HTTP_200_OK, message="Success")
+    def get(self, request, *args, **kwargs):
+        uuid1 = request.query_params.get("uuid")
+        if not uuid1:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_400_BAD_REQUEST, message="uuid is required.")
+        chat_instance = Chat.objects.filter(uuid=uuid1).first()
+        if not chat_instance:
+            return ResponseFormatter.format_response(None, http_code=status.HTTP_404_NOT_FOUND, message="Chat not found.")
+        chat_instance.last_activity = timezone.now()
+        chat_instance.save()
+        try:
+            with open(f"{uuid1}.pkl", 'rb') as chatfile:
+                chat = pickle.load(chatfile)
+        except IOError:
+            chat = []
+        return ResponseFormatter.format_response({"chat": chat, "uuid": uuid1}, http_code=status.HTTP_200_OK, message="Success")
